@@ -6,12 +6,21 @@ import serializeForm from 'form-serialize'
 // Here's a simple <form>:
 
 class Forms extends React.Component {
+  state = {
+    firstName: 'first',
+    lastName: 'last'
+  }
+
   render() {
     return (
       <div>
         <h1>Forms</h1>
+        <p>Name: {this.state.firstName} {this.state.lastName}</p>
         <form>
-          <input type="text"/>
+          <input
+            type="text"
+            value="test"
+          />
         </form>
       </div>
     )

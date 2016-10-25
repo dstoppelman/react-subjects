@@ -14,7 +14,7 @@
 //   sender and/or content
 ////////////////////////////////////////////////////////////////////////////////
 import React from 'react'
-import { render } from 'react-dom'
+import { render, findDOMNode } from 'react-dom'
 import { login, sendMessage, subscribeToMessages } from './utils/ChatUtils'
 import './styles'
 
@@ -42,58 +42,142 @@ unsubscribe() // stop listening for new messages
 The world is your oyster!
 */
 
-const Chat = React.createClass({
+class ChatScroller extends React.Component {
+  componentDidMount() {
+    this.autoScroll = true;
+  }
+
+  componentDidUpdate() {
+    if (this.autoScroll) this.scrollToBottom()
+  }
+
+  scrollToBottom() {
+    findDOMNode(this).scrollTop = 9999999
+  }
+
+  handleScroll = (event) => {
+    const { scrollTop, scrollHeight, clientHeight } = event.target
+    const distanceToBottom = scrollHeight - (scrollTop + clientHeight)
+    this.autoScroll = distanceToBottom < 10
+  }
+
   render() {
+    return (
+      <div {...this.props} onScroll={this.handleScroll}/>
+    )
+  }
+}
+
+class Chat extends React.Component {
+  state = {
+    auth: null,
+    messages: []
+  }
+
+  componentDidMount() {
+    login((error, auth) => {
+      if (error) {
+        console.log(error)
+      }
+      this.setState({ auth })
+    })
+
+    subscribeToMessages(messages => {
+      this.setState({ messages })
+    })
+  }
+
+  componentDidUpdate() {
+    // const messageNodes = document.querySelectorAll("li.message")
+    // const lastMessageNode = messageNodes[messageNodes.length - 1]
+    // lastMessageNode.scrollIntoView()
+    // this.scrollToBottom()
+  }
+
+  // scrollToBottom() {
+  //   this.refs.scroller.scrollTop = 9999999
+  // }
+
+  handleSubmit = (event) => {
+    event.preventDefault()
+    const messageText = this.refs.message.value
+    if (messageText) {
+      const { auth } = this.state
+      sendMessage(
+        auth.uid,                       // the auth.uid string
+        auth.github.username,           // the username
+        auth.github.profileImageURL,    // the user's profile image
+        messageText                     // the text of the message
+      )
+    }
+    event.target.reset()
+  }
+
+  render() {
+    const { auth, messages } = this.state
+
+    const messageGroups = []
+    let currentGroup = []
+    let lastMessage
+
+    // console.log(messages)
+
+    // let messageGroups = messages.reduce((currentGroup, messages) => {
+    //
+    // }, []);
+
+    messages.forEach(message => {
+      if (lastMessage && lastMessage.uid === message.uid) {
+        //same group
+        currentGroup.push(message)
+      } else {
+        //new group
+        if (currentGroup.length) {
+          messageGroups.push(currentGroup)
+        }
+        currentGroup = [ message ]
+      }
+      lastMessage = message
+    })
+
+    if (currentGroup.length) {
+      messageGroups.push(currentGroup)
+    }
+
+    if (!auth) {
+      return <p>Loading...</p>
+    }
+
     return (
       <div className="chat">
         <header className="chat-header">
           <h1 className="chat-title">HipReact</h1>
-          <p className="chat-message-count"># messages: 3</p>
+          <p className="chat-message-count"># messages: {messages.length}</p>
         </header>
-        <div className="messages">
+        <ChatScroller className="messages">
           <ol className="message-groups">
-            <li className="message-group">
-              <div className="message-group-avatar">
-                <img src="https://avatars1.githubusercontent.com/u/92839"/>
-              </div>
-              <ol className="messages">
-                <li className="message">So, check it out:</li>
-                <li className="message">QA Engineer walks into a bar.</li>
-                <li className="message">Orders a beer.</li>
-                <li className="message">Orders 0 beers.</li>
-                <li className="message">Orders 999999999 beers.</li>
-                <li className="message">Orders a lizard.</li>
-                <li className="message">Orders -1 beers.</li>
-                <li className="message">Orders a sfdeljknesv.</li>
-              </ol>
-            </li>
-            <li className="message-group">
-              <div className="message-group-avatar">
-                <img src="https://avatars2.githubusercontent.com/u/100200"/>
-              </div>
-              <ol className="messages">
-                <li className="message">Haha</li>
-                <li className="message">Stop stealing other people's jokes :P</li>
-              </ol>
-            </li>
-            <li className="message-group">
-              <div className="message-group-avatar">
-                <img src="https://avatars1.githubusercontent.com/u/92839"/>
-              </div>
-              <ol className="messages">
-                <li className="message">:'(</li>
-              </ol>
-            </li>
+            {messageGroups.map((messages, index) => (
+              <li key={index} className="message-group">
+                <div className="message-group-avatar">
+                  <img src={messages[0].avatarURL}/>
+                </div>
+                <ol className="messages">
+                  {messages.map((message, index) => (
+                    <li key={index} className="message">{message.text}</li>
+                  ))}
+                </ol>
+              </li>
+            ))}
           </ol>
-        </div>
-        <form className="new-message-form">
+        </ChatScroller>
+        <form className="new-message-form" onSubmit={this.handleSubmit}>
           <div className="new-message">
-            <input ref="message" type="text" placeholder="say something..."/>
+            <input name="message" ref="message" type="text" placeholder="say something..."/>
           </div>
         </form>
       </div>
     )
   }
-})
+}
 
 render(<Chat/>, document.getElementById('app'))

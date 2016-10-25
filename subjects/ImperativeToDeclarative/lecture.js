@@ -14,20 +14,60 @@ styles.theremin = {
   display: 'inline-block'
 }
 
+/*
+* componentWillMount - just before we mount, setState before the initial render
+* componentDidMount - just after we mount, access the DOM
+* componentWillReceiveProps - just after we receive new props, setState derived from props
+* componentDidUpdate - just after we update the DOM, not on first mount, access the DOM
+* componentWillUnmount - just before we unmount, cleanup timers, network requests
+* */
+
+class Tone extends React.Component {
+  doImperativeWork() {
+    const { isPlaying, pitch, volume } = this.props
+
+    if (isPlaying) {
+      this.oscillator.play()
+    } else {
+      this.oscillator.stop()
+    }
+
+    this.oscillator.setPitchBend(pitch)
+    this.oscillator.setVolume(volume)
+  }
+
+  componentDidMount() {
+    this.oscillator = createOscillator()
+    this.doImperativeWork()
+  }
+
+  componentDidUpdate() {
+    this.doImperativeWork()
+  }
+
+  render() {
+    return null
+  }
+}
+
+class Theremin extends React.Component {
+
+}
+
 class App extends React.Component {
   componentDidMount() {
     this.oscillator = createOscillator()
   }
 
-  play() {
+  play = () => {
     this.oscillator.play()
   }
 
-  stop() {
+  stop = () => {
     this.oscillator.stop()
   }
 
-  changeTone(event) {
+  changeTone = (event) => {
     const { clientX, clientY } = event
     const { top, right, bottom, left } = event.target.getBoundingClientRect()
     const pitch = (clientX - left) / (right - left)

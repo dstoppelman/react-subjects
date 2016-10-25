@@ -44,6 +44,7 @@ class App extends React.Component {
   render() {
     return (
       <div>
+        <button>toggle all</button>
         <div>
           {this.state.tacos.map((taco) => (
             <ContentToggle

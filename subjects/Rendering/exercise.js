@@ -28,14 +28,51 @@ const DATA = {
   ]
 }
 
+let currentFoodType = 'mexican';
+let sortAscending = true;
+
+function changeFoodType(event) {
+  // event.preventDefault()
+  currentFoodType = event.target.value
+  updateThePage()
+}
+
+const updateThePage = () => ReactDOM.render(<Menu/>, document.getElementById('app'), () => require('./tests').run())
+
+// function updateThePage() {
+//   ReactDOM.render(<Menu/>, document.getElementById('app'), () => require('./tests').run())
+// }
+
+function toggleSortOrder() {
+  sortAscending = !sortAscending
+  updateThePage()
+}
+
+updateThePage()
+
 function Menu() {
+  const items = DATA.items
+    .filter(item => item.type === currentFoodType)
+    .sort(sortBy(sortAscending ? 'name' : '-name'))
+    .map(item => <li key={item.id}>{item.name}</li>)
+
   return (
     <div>
-      Open the console, you have failing tests.
+      <h1>
+        {DATA.title}
+      </h1>
+      <select onChange={changeFoodType}>
+        <option>mexican</option>
+        <option>english</option>
+      </select>
+      <button onClick={toggleSortOrder}>toggle sort order</button>
+      <ul>
+        {items}
+      </ul>
     </div>
   )
 }
 
-ReactDOM.render(<Menu/>, document.getElementById('app'), () => {
-  require('./tests').run()
-})
+// ReactDOM.render(<Menu/>, document.getElementById('app'), () => {
+//   require('./tests').run()
+// })

@@ -10,9 +10,37 @@ import $ from 'jquery'
 import 'bootstrap-webpack'
 
 class Modal extends React.Component {
+  bootstrapCloseModalEvent = 'hidden.bs.modal'
+
   static propTypes = {
+    isOpen: PropTypes.bool.isRequired,
     title: PropTypes.string.isRequired,
     children: PropTypes.node
+  }
+
+  showOrHide() {
+    $( findDOMNode( this ) ).modal( this.props.isOpen ? 'show' : 'hide' )
+  }
+
+  componentDidMount() {
+    this.showOrHide()
+
+    //sync state in case the modal was closed from overlay click
+    $( findDOMNode( this) ).on( this.bootstrapCloseModalEvent, () => {
+      if ( this.props.onClose ) {
+        this.props.onClose()
+      }
+    })
+  }
+
+  componentWillUnmount() {
+    $( findDOMNode( this) ).unbind( this.bootstrapCloseModalEvent );
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.isOpen !== this.props.isOpen) {
+      this.showOrHide()
+    }
   }
 
   render() {
@@ -34,12 +62,14 @@ class Modal extends React.Component {
 }
 
 class App extends React.Component {
-  openModal() {
-    $(findDOMNode(this.refs.modal)).modal('show')
+  state = { isModalOpen: false }
+
+  openModal = () => {
+    this.setState({ isModalOpen: true })
   }
 
-  closeModal() {
-    $(findDOMNode(this.refs.modal)).modal('hide')
+  closeModal = () => {
+    this.setState({ isModalOpen: false })
   }
 
   render() {
@@ -49,15 +79,21 @@ class App extends React.Component {
 
         <button
           className="btn btn-primary"
-          onClick={this.openModal}
+          onClick={ this.openModal }
         >open modal</button>
 
-        <Modal ref="modal" title="Declarative is better">
+        {/*<pre>{ JSON.stringify( this.state, null, 2 ) }</pre>*/}
+
+        <Modal
+          isOpen={ this.state.isModalOpen }
+          onClose= { this.closeModal }
+          title="Declarative is better"
+        >
           <p>Calling methods on instances is a FLOW not a STOCK!</p>
           <p>It’s the dynamic process, not the static program in text space.</p>
           <p>You have to experience it over time, rather than in snapshots of state.</p>
           <button
-            onClick={this.closeModal}
+            onClick={ this.closeModal }
             type="button"
             className="btn btn-default"
           >Close</button>

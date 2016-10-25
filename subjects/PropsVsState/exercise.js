@@ -22,20 +22,18 @@ import data from './lib/data'
 
 class Tabs extends React.Component {
   static propTypes = {
-    data: React.PropTypes.array.isRequired
-  }
-
-  state = {
-    activeTabIndex: 0
+    data: React.PropTypes.array.isRequired,
+    activeTabIndex: React.PropTypes.number.isRequired,
+    onTabSelect: React.PropTypes.func.isRequired
   }
 
   handleTabClick(activeTabIndex) {
-    this.setState({ activeTabIndex })
+    this.props.onTabSelect(activeTabIndex)
   }
 
   renderTabs() {
     return this.props.data.map((tab, index) => {
-      const style = this.state.activeTabIndex === index ?
+      const style = this.props.activeTabIndex === index ?
         styles.activeTab : styles.tab
       return (
         <div
@@ -49,7 +47,7 @@ class Tabs extends React.Component {
   }
 
   renderPanel() {
-    const tab = this.props.data[this.state.activeTabIndex]
+    const tab = this.props.data[this.props.activeTabIndex]
     return (
       <div>
         <p>{tab.description}</p>
@@ -72,11 +70,22 @@ class Tabs extends React.Component {
 }
 
 class App extends React.Component {
+  state = { activeTabIndex: 0 }
+
+  setActiveTabIndex = (activeTabIndex) => {
+    this.setState({ activeTabIndex })
+  }
+
   render() {
     return (
       <div>
         <h1>Props v. State</h1>
-        <Tabs ref="tabs" data={this.props.tabs}/>
+        <Tabs
+          ref="tabs"
+          data={this.props.tabs}
+          activeTabIndex={this.state.activeTabIndex}
+          onTabSelect={index => this.setActiveTabIndex(index)}
+        />
       </div>
     )
   }

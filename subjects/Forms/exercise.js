@@ -20,33 +20,80 @@ import ReactDOM from 'react-dom'
 import serializeForm from 'form-serialize'
 
 class CheckoutForm extends React.Component {
+  state = {
+    billingName: 'Dan',
+    billingState: 'MA',
+    isShippingSameAsBilling: false,
+    shippingName: 'Gary',
+    shippingState: 'IN'
+  }
+
+  handleSubmit = (event) => {
+    event.preventDefault()
+    // const values = serializeForm(event.target)
+    const values = serializeForm(event.target, { hash: true })
+    console.log(values)
+  }
+
   render() {
     return (
       <div>
         <h1>Checkout</h1>
-        <form>
+        <pre>{JSON.stringify(this.state, null, 2)}</pre>
+        <form onSubmit={this.handleSubmit}>
           <fieldset>
             <legend>Billing Address</legend>
             <p>
-              <label>Billing Name: <input type="text"/></label>
+              <label>Billing Name: <input
+                type="text"
+                name="Billing Name"
+                defaultValue={this.state.billingName}
+                onChange={event => this.setState({ billingName: event.target.value })}
+              /></label>
             </p>
             <p>
-              <label>Billing State: <input type="text" size="2"/></label>
+              <label>Billing State: <input
+                type="text"
+                name="Billing State"
+                defaultValue={this.state.billingState}
+                onChange={event => this.setState({ billingState: event.target.value })}
+                size="2"
+              /></label>
             </p>
+            {this.state.billingState.length > 2 && <span>Please use the two-character abbreviation</span>}
           </fieldset>
 
           <br/>
 
           <fieldset>
-            <label><input type="checkbox"/> Same as billing</label>
+            <label><input
+              type="checkbox"
+              onChange={event => this.setState({ isShippingSameAsBilling: event.target.checked })}
+              defaultChecked={this.state.isShippingSameAsBilling}
+            /> Same as billing</label>
             <legend>Shipping Address</legend>
             <p>
-              <label>Shipping Name: <input type="text"/></label>
+              <label>Shipping Name: <input
+                type="text"
+                name="Shipping Name"
+                value={this.state.isShippingSameAsBilling ? this.state.billingName : this.state.shippingName}
+                readOnly={this.state.isShippingSameAsBilling}
+                onChange={event => this.setState({ shippingName: event.target.value })}
+              /></label>
             </p>
             <p>
-              <label>Shipping State: <input type="text" size="2"/></label>
+              <label>Shipping State: <input
+                type="text"
+                name="Shipping State"
+                value={this.state.isShippingSameAsBilling ? this.state.billingState : this.state.shippingState}
+                readOnly={this.state.isShippingSameAsBilling}
+                onChange={event => this.setState({ shippingState: event.target.value })}
+                size="2"
+              /></label>
             </p>
+            {this.state.shippingState.length > 2 && <span>Please use the two-character abbreviation</span>}
           </fieldset>
+          <button type="submit">Submit</button>
         </form>
       </div>
     )

@@ -1,38 +1,60 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-let isOpen = false
+class ContentToggle extends React.Component {
+  state = {
+    isOpen: false
+  }
 
-function handleClick() {
-  isOpen = !isOpen
-  updateThePage()
+  setState = (nextState) => {
+    Object.assign(this.state, nextState)
+    // updateThePage()
+  }
+
+  handleClick = () => {
+    this.setState({
+      open: !this.state.isOpen
+    })
+  }
+
+  render() {
+    let summaryClassName = 'ContentToggle__Summary'
+
+    if (this.state.isOpen)
+      summaryClassName += ' ContentToggle__Summary--is-open'
+
+    return (
+      <div className="ContentToggle">
+        <button onClick={this.handleClick} className={summaryClassName}>
+          {this.props.title}
+        </button>
+        {this.state.isOpen && (
+          <div className="ContentToggle__Details">
+            {this.props.children}
+          </div>
+        )}
+      </div>
+    )
+  }
 }
 
-function ContentToggle() {
-  let summaryClassName = 'ContentToggle__Summary'
+ReactDOM.render((
+  <div>
+    <ContentToggle title="Tacos">
+      <p>A taco is a traditional Mexican dish composed of a corn or wheat tortilla folded or rolled around a
+        filling.</p>
+    </ContentToggle>
+    <ContentToggle title="Burritos">
+      <p>test</p>
+    </ContentToggle>
+  </div>
+), document.getElementById('app'))
 
-  if (isOpen)
-    summaryClassName += ' ContentToggle__Summary--is-open'
-
-  return (
-    <div className="ContentToggle">
-      <button onClick={handleClick} className={summaryClassName}>
-        Tacos
-      </button>
-      {isOpen && (
-        <div className="ContentToggle__Details">
-          <p>A taco is a traditional Mexican dish composed of a corn or wheat tortilla folded or rolled around a filling.</p>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function updateThePage() {
-  ReactDOM.render(<ContentToggle/>, document.getElementById('app'))
-}
-
-updateThePage()
+// function updateThePage() {
+  {/*ReactDOM.render(<ContentToggle/>, document.getElementById('app'))*/}
+// }
+//
+// updateThePage()
 
 ////////////////////////////////////////////////////////////////////////////////
 // Let's encapsulate state in an object and call it what it really is. Then, add
@@ -61,12 +83,12 @@ updateThePage()
 
 //class ContentToggle extends React.Component {
 //  state = {
-//    isOpen: false
+//    state.isOpen: false
 //  }
 //
 //  handleClick() {
 //    this.setState({
-//      isOpen: !this.state.isOpen
+//      state.isOpen: !this.state.state.isOpen
 //    })
 //
 //    if (this.props.onToggle)
@@ -76,7 +98,7 @@ updateThePage()
 //  render() {
 //    let summaryClassName = 'ContentToggle__Summary'
 //
-//    if (this.state.isOpen)
+//    if (this.state.state.isOpen)
 //      summaryClassName += ' ContentToggle__Summary--is-open'
 //
 //    return (
@@ -84,7 +106,7 @@ updateThePage()
 //        <button onClick={this.handleClick} className={summaryClassName}>
 //          {this.props.title}
 //        </button>
-//        {this.state.isOpen && (
+//        {this.state.state.isOpen && (
 //          <div className="ContentToggle__Details">
 //            {this.props.children}
 //          </div>
